@@ -1,0 +1,21 @@
+{
+  "name": "elib-apis",
+  "version": "1.0.0",
+  "description": "A elib rest api project using express js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon server.ts"
+  },
+  "keywords": [
+    "api",
+    "rest_api",
+    "mern"
+  ],
+  "author": "Mirza Firoz Uddin <mz.firozuddin@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
