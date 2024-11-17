@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { UserType } from "./userTypes";
+import { IUser } from "./userTypes";
 
-const userSchema = new mongoose.Schema<UserType>(
+const userSchema = new mongoose.Schema<IUser>(
     {
         name: {
             type: String,
