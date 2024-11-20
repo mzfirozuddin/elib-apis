@@ -3,6 +3,7 @@ import globalErrorHandler from "./middlewares/globalErrorHandler";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "./config/config";
+import userRouter from "./user/user.routes";
 
 const app = express();
 
@@ -15,9 +16,12 @@ app.use(express.urlencoded({ extended: true }));
 //: Middleware for handle cookie efficiently
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
-    res.send("Hello from home!!!");
+app.get("/health-check", (req, res) => {
+    res.status(200).json({ message: "Server Health Is Good." });
 });
+
+//: Register user router
+app.use("/api/user", userRouter);
 
 //: global error handler
 app.use(globalErrorHandler);
