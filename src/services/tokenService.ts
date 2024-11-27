@@ -19,4 +19,5 @@ class TokenService {
     }
 }
 
-export default TokenService;
+export const tokenService = new TokenService();
+// export default TokenService;
