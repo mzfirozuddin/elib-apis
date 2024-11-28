@@ -113,4 +113,77 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { register };
+const login = async (req: Request, res: Response, next: NextFunction) => {
+    //: Validate the request
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        res.status(400).json({ error: result.array() });
+    }
+
+    //: Get user details from req.body
+    const { email, password } = req.body;
+
+    try {
+        //: Check user is present in DB or not
+        const user = await User.findOne({ email });
+        if (!user) {
+            const err = createHttpError(404, "Email does not exist!");
+            return next(err);
+        }
+
+        //: If user present, Check password is correct or not
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            const err = createHttpError(401, "Invalid login credentials!");
+            return next(err);
+        }
+
+        //: Generate access and refresh token
+        const payload = {
+            id: user._id,
+            email: user.email,
+            name: user.name,
+        };
+
+        const accessToken = tokenService.generateAccessToken(payload);
+        if (!accessToken) {
+            const err = createHttpError(
+                400,
+                "Error while generate access token!"
+            );
+            return next(err);
+        }
+
+        const refreshToken = tokenService.generateRefreshToken(user._id);
+        if (!refreshToken) {
+            const err = createHttpError(
+                400,
+                "Error while generate refresh token!"
+            );
+            return next(err);
+        }
+
+        //: Update refresh token in DB
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        //: Store tokens in cookie and send response
+        const option = {
+            httpOnly: true,
+            secure: true,
+        };
+        res.status(200)
+            .cookie("accessToken", accessToken, option)
+            .cookie("refreshToken", refreshToken, option)
+            .json({
+                userId: user.id,
+                accessToken: accessToken,
+                message: "Login Successful.",
+            });
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
+export { register, login };
