@@ -5,6 +5,7 @@ import { User } from "./user.model";
 import createHttpError from "http-errors";
 import { uploadOnCloudinary } from "../services/cloudinary";
 import { tokenService } from "../services/tokenService";
+import { CustomRequest } from "../services/types";
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
     // console.log(req.body);
@@ -186,4 +187,35 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { register, login };
+const logout = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        await User.findByIdAndUpdate(
+            req.user?._id,
+            {
+                $set: {
+                    refreshToken: "",
+                },
+            },
+            { new: true }
+        );
+
+        const option = {
+            httpOnly: true,
+            secure: true,
+        };
+
+        res.status(200)
+            .clearCookie("accessToken", option)
+            .clearCookie("refreshToken", option)
+            .json({ message: "Logout Successful." });
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
+export { register, login, logout };
