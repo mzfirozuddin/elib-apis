@@ -29,7 +29,7 @@ export const verifyJWT = async (
 
         //: check for user
         const user = await User.findById(decodedToken?.sub).select(
-            "-password -refreshToken"
+            "-password -refreshToken -__v"
         );
         if (!user) {
             const err = createHttpError(401, "Inavlid access token!");

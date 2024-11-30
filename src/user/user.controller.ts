@@ -218,4 +218,14 @@ const logout = async (
     }
 };
 
-export { register, login, logout };
+const self = async (req: CustomRequest, res: Response, next: NextFunction) => {
+    try {
+        const user = req?.user;
+        res.status(200).json(user);
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
+export { register, login, logout, self };
