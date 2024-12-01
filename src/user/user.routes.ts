@@ -1,5 +1,11 @@
 import express from "express";
-import { login, logout, register, self } from "./user.controller";
+import {
+    login,
+    logout,
+    refreshAccessToken,
+    register,
+    self,
+} from "./user.controller";
 import registerValidator from "../validators/register-validator";
 import upload from "../middlewares/multer";
 import loginValidator from "../validators/login-validator";
@@ -15,6 +21,7 @@ userRouter.post(
 );
 
 userRouter.post("/login", loginValidator, login);
+userRouter.post("/refresh-tokens", refreshAccessToken);
 
 //: Secured routes
 userRouter.post("/logout", verifyJWT, logout);

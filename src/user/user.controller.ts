@@ -1,11 +1,13 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { User } from "./user.model";
 import createHttpError from "http-errors";
 import { uploadOnCloudinary } from "../services/cloudinary";
 import { tokenService } from "../services/tokenService";
-import { CustomRequest } from "../services/types";
+import { CustomRequest, IPayload } from "../services/types";
+import { config } from "../config/config";
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
     // console.log(req.body);
@@ -140,7 +142,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         //: Generate access and refresh token
-        const payload = {
+        const payload: IPayload = {
             id: user._id,
             email: user.email,
             name: user.name,
@@ -228,4 +230,90 @@ const self = async (req: CustomRequest, res: Response, next: NextFunction) => {
     }
 };
 
-export { register, login, logout, self };
+const refreshAccessToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    //: Collect token
+    const incomingRefreshToken =
+        req.cookies?.refreshToken ||
+        req.body?.refreshToken ||
+        req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!incomingRefreshToken) {
+        const err = createHttpError(401, "Unauthorized Access!");
+        return next(err);
+    }
+
+    try {
+        //: Verify the token
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            config.refreshTokenSecret as string
+        );
+
+        //: check the user
+        const user = await User.findById(decodedToken?.sub);
+        if (!user) {
+            const err = createHttpError(401, "Invalid refresh token!");
+            return next(err);
+        }
+
+        //: Compare incoming token with DB stored token
+        if (incomingRefreshToken !== user.refreshToken) {
+            const err = createHttpError(
+                401,
+                "Refresh token has expired or used!"
+            );
+            return next(err);
+        }
+
+        //: Generate new access and refresh token
+        const payload: IPayload = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+        };
+        const newAccessToken = tokenService.generateAccessToken(payload);
+        if (!newAccessToken) {
+            const err = createHttpError(
+                400,
+                "Error while generate access token!"
+            );
+            return next(err);
+        }
+
+        const newRefreshToken = tokenService.generateRefreshToken(user._id);
+        if (!newRefreshToken) {
+            const err = createHttpError(
+                400,
+                "Error while generate refresh token!"
+            );
+            return next(err);
+        }
+
+        //: store new refresh token in DB
+        user.refreshToken = newRefreshToken;
+        user.save({ validateBeforeSave: false });
+
+        //: Store access and refresh token in cookie and return response
+        const option = {
+            httpOnly: true,
+            secure: true,
+        };
+        res.status(200)
+            .cookie("accessToken", newAccessToken, option)
+            .cookie("refreshToken", newRefreshToken, option)
+            .json({
+                userId: user._id,
+                accessToken: newAccessToken,
+                message: "Access token refreshed.",
+            });
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
+export { register, login, logout, self, refreshAccessToken };
