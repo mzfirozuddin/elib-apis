@@ -1,5 +1,6 @@
 import express from "express";
 import {
+    changePassword,
     login,
     logout,
     refreshAccessToken,
@@ -10,6 +11,7 @@ import registerValidator from "../validators/register-validator";
 import upload from "../middlewares/multer";
 import loginValidator from "../validators/login-validator";
 import { verifyJWT } from "../middlewares/AuthMiddleware";
+import passwordValidator from "../validators/password-validator";
 
 const userRouter = express.Router();
 
@@ -26,5 +28,11 @@ userRouter.post("/refresh-tokens", refreshAccessToken);
 //: Secured routes
 userRouter.post("/logout", verifyJWT, logout);
 userRouter.get("/self", verifyJWT, self);
+userRouter.post(
+    "/change-password",
+    passwordValidator,
+    verifyJWT,
+    changePassword
+);
 
 export default userRouter;

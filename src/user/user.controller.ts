@@ -316,4 +316,55 @@ const refreshAccessToken = async (
     }
 };
 
-export { register, login, logout, self, refreshAccessToken };
+const changePassword = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    //: Validate the request
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        res.status(400).json({ error: result.array() });
+        return;
+    }
+
+    //: Collect data from req.body
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+        //: check the user
+        const user = await User.findById(req.user?._id);
+        if (!user) {
+            const err = createHttpError(400, "User not found!");
+            return next(err);
+        }
+
+        //: check old password is correct or not
+        const isPasswordCorrect = await bcrypt.compare(
+            oldPassword,
+            user.password
+        );
+        if (!isPasswordCorrect) {
+            const err = createHttpError(401, "Incorrect old password");
+            return next(err);
+        }
+
+        //: if everything is ok then hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        //: update the password in DB
+        user.password = hashedNewPassword;
+        user.save({ validateBeforeSave: false });
+
+        //: Return response
+        res.status(200).json({
+            userId: user._id,
+            message: "Password changed successfully.",
+        });
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
+export { register, login, logout, self, refreshAccessToken, changePassword };
