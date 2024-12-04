@@ -4,7 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { User } from "./user.model";
 import createHttpError from "http-errors";
-import { uploadOnCloudinary } from "../services/cloudinary";
+import {
+    deleteFromCloudinary,
+    uploadOnCloudinary,
+} from "../services/cloudinary";
 import { tokenService } from "../services/tokenService";
 import { CustomRequest, IPayload } from "../services/types";
 import { config } from "../config/config";
@@ -405,6 +408,76 @@ const updateProfileDetails = async (
     }
 };
 
+const updateAvatar = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    //: collect avatar file and check
+    const file = req.file as Express.Multer.File;
+
+    const avatarMimeType: string = file?.mimetype.split("/")[1];
+    const avatarFileName: string = file?.filename;
+    const avatarLocalPath: string = file?.path;
+
+    // console.log(avatarMimeType, avatarFileName, avatarLocalPath);
+
+    if (!avatarLocalPath) {
+        const err = createHttpError(400, "Avatar file is required!");
+        return next(err);
+    }
+
+    try {
+        //: upload file on cloudinary
+        const avatar = await uploadOnCloudinary(
+            avatarLocalPath,
+            avatarMimeType,
+            avatarFileName
+        );
+
+        // console.log(avatar);
+
+        if (!avatar) {
+            const err = createHttpError(500, "Error while uploading avatar!");
+            return next(err);
+        }
+
+        //: Update the avatar in DB
+        const user = await User.findByIdAndUpdate(
+            req.user?._id,
+            {
+                $set: { avatar: avatar.url },
+            },
+            { new: true }
+        ).select("-password -refreshToken");
+
+        if (!user) {
+            const err = createHttpError(500, "Something went wrong!");
+            return next(err);
+        }
+
+        //:delete old avatar from cloudinary
+        //http://res.cloudinary.com/drqredubp/image/upload/v1732991427/elib-asset/og8p0aitakrxa1j9avde.png
+        // publicId = elib-asset/og8p0aitakrxa1j9avde
+        const avatarFileSplit = req.user?.avatar.split("/");
+        const oldAvatarFilePublicId =
+            avatarFileSplit?.at(-2) +
+            "/" +
+            avatarFileSplit?.at(-1)?.split(".").at(-2);
+        // console.log(oldAvatarFilePublicId);
+
+        await deleteFromCloudinary(oldAvatarFilePublicId);
+
+        res.status(200).json({
+            userId: user._id,
+            message: "Avatar updated successfully.",
+        });
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
 export {
     register,
     login,
@@ -413,4 +486,5 @@ export {
     refreshAccessToken,
     changePassword,
     updateProfileDetails,
+    updateAvatar,
 };

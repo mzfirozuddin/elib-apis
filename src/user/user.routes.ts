@@ -6,6 +6,7 @@ import {
     refreshAccessToken,
     register,
     self,
+    updateAvatar,
     updateProfileDetails,
 } from "./user.controller";
 import registerValidator from "../validators/register-validator";
@@ -36,5 +37,11 @@ userRouter.post(
     changePassword
 );
 userRouter.patch("/update-profile", verifyJWT, updateProfileDetails);
+userRouter.patch(
+    "/update-avatar",
+    upload.single("avatar"),
+    verifyJWT,
+    updateAvatar
+);
 
 export default userRouter;
