@@ -367,4 +367,50 @@ const changePassword = async (
     }
 };
 
-export { register, login, logout, self, refreshAccessToken, changePassword };
+const updateProfileDetails = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    //: Collect data from req.body and validate
+    const { name } = req.body;
+    if (!name) {
+        const err = createHttpError(400, "Name is required!");
+        return next(err);
+    }
+
+    try {
+        //: update the details
+        const user = await User.findByIdAndUpdate(
+            req.user?._id,
+            {
+                $set: { name: name },
+            },
+            { new: true }
+        ).select("-password -refreshToken");
+
+        if (!user) {
+            const err = createHttpError(500, "Something went wrong!");
+            return next(err);
+        }
+
+        //: return response
+        res.status(200).json({
+            userId: user._id,
+            message: "Update profile successfully.",
+        });
+    } catch (error) {
+        next(error);
+        return;
+    }
+};
+
+export {
+    register,
+    login,
+    logout,
+    self,
+    refreshAccessToken,
+    changePassword,
+    updateProfileDetails,
+};

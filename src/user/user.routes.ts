@@ -6,6 +6,7 @@ import {
     refreshAccessToken,
     register,
     self,
+    updateProfileDetails,
 } from "./user.controller";
 import registerValidator from "../validators/register-validator";
 import upload from "../middlewares/multer";
@@ -34,5 +35,6 @@ userRouter.post(
     verifyJWT,
     changePassword
 );
+userRouter.patch("/update-profile", verifyJWT, updateProfileDetails);
 
 export default userRouter;
