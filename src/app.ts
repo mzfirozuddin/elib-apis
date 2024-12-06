@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "./config/config";
 import userRouter from "./user/user.routes";
+import bookRouter from "./book/book.routes";
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.get("/health-check", (req, res) => {
 
 //: Register user router
 app.use("/api/user", userRouter);
+//: Register book router
+app.use("/api/books", bookRouter);
 
 //: global error handler
 app.use(globalErrorHandler);
