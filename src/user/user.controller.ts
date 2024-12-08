@@ -17,6 +17,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     //: Validate the request
     const result = validationResult(req);
     if (!result.isEmpty()) {
+        //!TODO: If validation failed then we have to delete file from local server
         // return res.status(400).json({ error: result.array() });  //! Error
         res.status(400).json({ error: result.array() });
         return;

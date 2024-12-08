@@ -15,16 +15,47 @@ const uploadOnCloudinary = async (
     mimeType: string,
     fileName: string
 ) => {
+    if (!localFilePath) {
+        return null;
+    }
+
     try {
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "raw", //: For pdf mostly
             filename_override: fileName,
             folder: "elib-asset",
             format: mimeType,
         });
         console.log("File uploaded successfully.", uploadResult.url);
         //: After successful upload file will be deleted from local server
+        await fs.promises.unlink(localFilePath);
+        return uploadResult;
+    } catch (error) {
+        //: If any error then delete from local server
         fs.unlinkSync(localFilePath);
+        console.log("Error in file upload: ", error);
+
+        return null;
+    }
+};
+
+const uploadPdfOnCloudinary = async (
+    localFilePath: string,
+    fileName: string
+) => {
+    if (!localFilePath) {
+        return null;
+    }
+
+    try {
+        const uploadResult = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "raw",
+            filename_override: fileName,
+            folder: "elib-asset-pdf",
+            format: "pdf",
+        });
+        console.log("File uploaded successfully.", uploadResult.url);
+        //: After successful upload file will be deleted from local server
+        await fs.promises.unlink(localFilePath);
         return uploadResult;
     } catch (error) {
         //: If any error then delete from local server
@@ -57,4 +88,4 @@ const deleteFromCloudinary = async (cloudinaryPublicId: string) => {
     }
 };
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+export { uploadOnCloudinary, uploadPdfOnCloudinary, deleteFromCloudinary };
