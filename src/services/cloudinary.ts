@@ -17,6 +17,7 @@ const uploadOnCloudinary = async (
 ) => {
     try {
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "raw", //: For pdf mostly
             filename_override: fileName,
             folder: "elib-asset",
             format: mimeType,
