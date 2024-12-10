@@ -1,5 +1,5 @@
 import express from "express";
-import { createBook } from "./book.controller";
+import { createBook, updateBook } from "./book.controller";
 import upload from "../middlewares/multer";
 import createBookValidator from "../validators/create-book-validator";
 import { verifyJWT } from "../middlewares/AuthMiddleware";
@@ -15,6 +15,17 @@ bookRouter.post(
     ]),
     createBookValidator,
     createBook
+);
+
+bookRouter.patch(
+    "/update/:bookId",
+    verifyJWT,
+    upload.fields([
+        { name: "coverImage", maxCount: 1 },
+        { name: "pdfFile", maxCount: 1 },
+    ]),
+    createBookValidator,
+    updateBook
 );
 
 export default bookRouter;
