@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import createHttpError from "http-errors";
 import {
     deleteFromCloudinary,
+    deletePdfFromCloudinary,
     uploadOnCloudinary,
     uploadPdfOnCloudinary,
 } from "../services/cloudinary";
@@ -126,8 +127,8 @@ const updateBook = async (
         }
 
         //: Check this user is authorized or not for update this book
-        console.log(book.author.toString());
-        console.log(req.user?._id);
+        // console.log(book.author.toString());
+        // console.log(req.user?._id.toString());
 
         if (book.author.toString() !== req.user?._id.toString()) {
             const err = createHttpError(
@@ -228,7 +229,7 @@ const updateBook = async (
                 oldCoverImageSplit?.at(-2) +
                 "/" +
                 oldCoverImageSplit?.at(-1)?.split(".").at(-2);
-            console.log(oldCoverImagePublicId);
+            // console.log(oldCoverImagePublicId);
 
             await deleteFromCloudinary(oldCoverImagePublicId);
         }
@@ -239,9 +240,9 @@ const updateBook = async (
             const oldPdfSplit = book?.pdfFile.split("/");
             const oldPdfFilePublicId =
                 oldPdfSplit?.at(-2) + "/" + oldPdfSplit?.at(-1);
-            console.log(oldPdfFilePublicId);
+            // console.log(oldPdfFilePublicId);
 
-            await deleteFromCloudinary(oldPdfFilePublicId);
+            await deletePdfFromCloudinary(oldPdfFilePublicId);
         }
 
         //: Return response
