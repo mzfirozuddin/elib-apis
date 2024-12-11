@@ -88,4 +88,32 @@ const deleteFromCloudinary = async (cloudinaryPublicId: string) => {
     }
 };
 
-export { uploadOnCloudinary, uploadPdfOnCloudinary, deleteFromCloudinary };
+const deletePdfFromCloudinary = async (cloudinaryPublicId: string) => {
+    try {
+        if (!cloudinaryPublicId) {
+            return null;
+        }
+
+        const deleteResult = await cloudinary.uploader.destroy(
+            cloudinaryPublicId,
+            {
+                invalidate: true,
+                resource_type: "raw",
+            }
+        );
+
+        console.log("Delete From Cloudinary: ", deleteResult);
+
+        return deleteResult;
+    } catch (error) {
+        console.log("Error on deleteFromCloudinary :: ", error);
+        return null;
+    }
+};
+
+export {
+    uploadOnCloudinary,
+    uploadPdfOnCloudinary,
+    deleteFromCloudinary,
+    deletePdfFromCloudinary,
+};
