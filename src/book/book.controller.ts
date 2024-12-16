@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import createHttpError from "http-errors";
 import {
@@ -257,4 +257,16 @@ const updateBook = async (
     }
 };
 
-export { createBook, updateBook };
+const getAllBooks = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        //:TODO: add pagination
+        const books = await Book.find();
+        res.status(200).json(books);
+    } catch (error) {
+        console.log("ERR: Error in getAllBooks!");
+        next(error);
+        return;
+    }
+};
+
+export { createBook, updateBook, getAllBooks };
