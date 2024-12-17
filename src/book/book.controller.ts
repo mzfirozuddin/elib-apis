@@ -288,4 +288,39 @@ const getAllBooks = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { createBook, updateBook, getAllBooks };
+const getCurrentUserBooks = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        //: Get data from query params for pagination
+        const page = Number(req.query.currentPage);
+        const currentPage = Number.isNaN(page) ? 1 : page;
+
+        const count = Number(req.query.perPage);
+        const perPage = Number.isNaN(count) ? 6 : count;
+
+        // console.log("Current Page: ", currentPage, "Per Page: ", perPage);
+
+        const books = await Book.find({ author: req.user?._id })
+            .skip((currentPage - 1) * perPage)
+            .limit(perPage);
+
+        // const totalCount = await Book.countDocuments();
+
+        res.status(200).json({
+            currentPage,
+            perPage,
+            // totalRecords: totalCount,
+            // totalPages: Math.ceil(totalCount / perPage),
+            data: books,
+        });
+    } catch (error) {
+        console.log("ERR: Error in getAllBooks!");
+        next(error);
+        return;
+    }
+};
+
+export { createBook, updateBook, getAllBooks, getCurrentUserBooks };

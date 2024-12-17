@@ -1,5 +1,10 @@
 import express from "express";
-import { createBook, getAllBooks, updateBook } from "./book.controller";
+import {
+    createBook,
+    getAllBooks,
+    getCurrentUserBooks,
+    updateBook,
+} from "./book.controller";
 import upload from "../middlewares/multer";
 import createBookValidator from "../validators/create-book-validator";
 import { verifyJWT } from "../middlewares/AuthMiddleware";
@@ -29,5 +34,6 @@ bookRouter.patch(
 );
 
 bookRouter.get("/allBooks", getAllBooks);
+bookRouter.get("/userBooks", verifyJWT, getCurrentUserBooks);
 
 export default bookRouter;
