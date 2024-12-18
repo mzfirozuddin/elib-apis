@@ -3,6 +3,7 @@ import {
     createBook,
     getAllBooks,
     getCurrentUserBooks,
+    getSingleBook,
     updateBook,
 } from "./book.controller";
 import upload from "../middlewares/multer";
@@ -35,5 +36,6 @@ bookRouter.patch(
 
 bookRouter.get("/allBooks", getAllBooks);
 bookRouter.get("/userBooks", verifyJWT, getCurrentUserBooks);
+bookRouter.get("/:bookId", getSingleBook);
 
 export default bookRouter;

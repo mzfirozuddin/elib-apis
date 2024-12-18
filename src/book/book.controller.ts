@@ -317,10 +317,41 @@ const getCurrentUserBooks = async (
             data: books,
         });
     } catch (error) {
-        console.log("ERR: Error in getAllBooks!");
+        console.log("ERR: Error in getCurrentUserBooks!");
         next(error);
         return;
     }
 };
 
-export { createBook, updateBook, getAllBooks, getCurrentUserBooks };
+const getSingleBook = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const bookId = req.params.bookId;
+        // console.log(bookId);
+
+        const book = await Book.findOne({ _id: bookId });
+        // console.log(book);
+
+        if (!book) {
+            const err = createHttpError(404, "Book not found!");
+            return next(err);
+        }
+
+        res.status(200).json(book);
+    } catch (error) {
+        console.log("ERR: Error in getSingleBook!");
+        next(error);
+        return;
+    }
+};
+
+export {
+    createBook,
+    updateBook,
+    getAllBooks,
+    getCurrentUserBooks,
+    getSingleBook,
+};
