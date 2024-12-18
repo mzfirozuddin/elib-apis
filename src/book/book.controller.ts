@@ -348,10 +348,68 @@ const getSingleBook = async (
     }
 };
 
+const deleteBook = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const bookId = req.params.bookId;
+
+        //: Check book present or not
+        const book = await Book.findOne({ _id: bookId });
+        if (!book) {
+            const err = createHttpError(404, "Book not found!");
+            return next(err);
+        }
+
+        //: Check user have access to delete book or not
+        if (book.author.toString() !== req.user?._id.toString()) {
+            const err = createHttpError(
+                403,
+                "You are not authorized to delete this book!"
+            );
+            return next(err);
+        }
+
+        //: Now delete files from cloudinary
+        const coverImageSplit = book?.coverImage.split("/");
+        const coverImagePublicId =
+            coverImageSplit?.at(-2) +
+            "/" +
+            coverImageSplit?.at(-1)?.split(".").at(-2);
+        // console.log(oldCoverImagePublicId);
+
+        await deleteFromCloudinary(coverImagePublicId);
+
+        // https://res.cloudinary.com/drqredubp/raw/upload/v1733684061/elib-asset-pdf/acijg5mthzu3ojknyozo.pdf
+        //* Public ID => elib-asset-pdf/acijg5mthzu3ojknyozo.pdf
+        const pdfSplit = book?.pdfFile.split("/");
+        const pdfFilePublicId = pdfSplit?.at(-2) + "/" + pdfSplit?.at(-1);
+        // console.log(oldPdfFilePublicId);
+
+        await deletePdfFromCloudinary(pdfFilePublicId);
+
+        //: Delete entry from DB
+        await Book.deleteOne({ _id: bookId });
+
+        //: Return response
+        res.status(204).json({
+            bookId: book._id,
+            message: "Book deleted successfully.",
+        });
+    } catch (error) {
+        console.log("ERR: Error in deleteBook!");
+        next(error);
+        return;
+    }
+};
+
 export {
     createBook,
     updateBook,
     getAllBooks,
     getCurrentUserBooks,
     getSingleBook,
+    deleteBook,
 };
