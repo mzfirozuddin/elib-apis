@@ -19,7 +19,7 @@ const userRouter = express.Router();
 
 userRouter.post(
     "/register",
-    upload.single("avatar"),
+    // upload.single("avatar"),
     registerValidator,
     register
 );

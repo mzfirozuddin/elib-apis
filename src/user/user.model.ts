@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema<IUser>(
         },
         avatar: {
             type: String, //: Cloudinary Url
-            required: true,
+            // required: true,
         },
         refreshToken: {
             type: String,

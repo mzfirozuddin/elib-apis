@@ -34,7 +34,8 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
             const error = createHttpError(409, "Email is already exist!");
             return next(error);
         }
-
+        //!==================================== We will see avatar later ======================================================
+        /* 
         //: Checks for avater
         const file = req.file as Express.Multer.File;
         // console.log(file);
@@ -58,7 +59,9 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         if (!avatar) {
             const err = createHttpError(500, "Error while uploading avatar!");
             return next(err);
-        }
+        } 
+        */
+        //!=======================================================================================
         //: Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
         //: create user object, save on DB, remove password and refreshToken
@@ -66,7 +69,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
             name,
             email,
             password: hashedPassword,
-            avatar: avatar.url,
+            avatar: "",
             refreshToken: "",
         });
 

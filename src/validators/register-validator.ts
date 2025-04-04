@@ -26,17 +26,17 @@ export default checkSchema({
         },
     },
 
-    confirmPassword: {
-        custom: {
-            options: (value, { req }) => {
-                if (value !== req.body.password) {
-                    throw new Error(
-                        "Password and ConfirmPassword are not matched!"
-                    );
-                }
+    // confirmPassword: {
+    //     custom: {
+    //         options: (value, { req }) => {
+    //             if (value !== req.body.password) {
+    //                 throw new Error(
+    //                     "Password and ConfirmPassword are not matched!"
+    //                 );
+    //             }
 
-                return true;
-            },
-        },
-    },
+    //             return true;
+    //         },
+    //     },
+    // },
 });
