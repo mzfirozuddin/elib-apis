@@ -269,6 +269,7 @@ const getAllBooks = async (req: Request, res: Response, next: NextFunction) => {
         // console.log("Current Page: ", currentPage, "Per Page: ", perPage);
 
         const books = await Book.find()
+            .populate("author", "name")
             .skip((currentPage - 1) * perPage)
             .limit(perPage);
 
@@ -332,7 +333,10 @@ const getSingleBook = async (
         const bookId = req.params.bookId;
         // console.log(bookId);
 
-        const book = await Book.findOne({ _id: bookId });
+        const book = await Book.findOne({ _id: bookId }).populate(
+            "author",
+            "name"
+        );
         // console.log(book);
 
         if (!book) {
