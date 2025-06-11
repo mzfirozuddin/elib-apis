@@ -9,7 +9,28 @@ import bookRouter from "./book/book.routes";
 const app = express();
 
 //:Middleware for handle CORS error
-app.use(cors({ origin: config.cors_origin, credentials: true }));
+//? Parse and clean origin list
+// const allowedOrigins = config.cors_origin
+//     ?.split(",")
+//     .map((origin) => origin.trim());
+// // console.log(allowedOrigins);
+
+// const corsOptions = {
+//     origin: function (
+//         origin: string | undefined,
+//         callback: (err: Error | null, allow?: boolean) => void
+//     ) {
+//         if (!origin || allowedOrigins?.includes(origin)) {
+//             callback(null, true);
+//         } else {
+//             callback(new Error("Not allowed by CORS"));
+//         }
+//     },
+//     credentials: true,
+// };
+
+app.use(cors({ origin: config.cors_origin, credentials: true })); //: we can use this for a single url
+// app.use(cors(corsOptions));
 //: Middleware for handle json data
 app.use(express.json());
 //: Middleware for handle data from url
